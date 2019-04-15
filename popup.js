@@ -25,12 +25,12 @@ window.onload = function(){
 
 
 store.onclick = function(element) {
-	var all_tabs=chrome.tabs.query({},function(tabs){
-		var arr = [];
-		for(var i in tabs){
-			arr.push(tabs[i].url);
-			console.log(tabs[i]);
-			chrome.tabs.remove(tabs[i].id);
+	chrome.windows.getCurrent({"populate":true},function(windows){
+		var arr=[];
+		for (var i in windows.tabs){
+			arr.push(windows.tabs[i].url);
+			console.log(windows.tabs[i]);
+			chrome.tabs.remove(windows.tabs[i].id);
 		}
 		chrome.tabs.create({});
 		var label=document.getElementById('label').value;
@@ -38,18 +38,15 @@ store.onclick = function(element) {
 		dic[label]=arr;
 		console.log(dic);
 		chrome.storage.sync.set({"dic": dic}, function() {});
-	});
+	})
 };
 
 function restore(key) {
 	return function(){
-		console.log(2345)
 		chrome.storage.sync.get("dic",function(items){
-		for(var i in items["dic"][key]){
-			chrome.tabs.create({url:items["dic"][key][i]});
-		}
-		delete dic[key];
-		chrome.storage.sync.set({"dic": dic}, function() {});
+			chrome.windows.create({"url":items["dic"][key]});
+			delete dic[key];
+			chrome.storage.sync.set({"dic": dic}, function() {});
 	});
 	}
 };
